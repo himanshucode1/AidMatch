@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AidMatch - Smart Helper System</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            text-align: center;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin: 10px;
+            border: none;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>AidMatch - Smart Helper Auto Assignment</h1>
+
+<button onclick="addHelper()">Add Helper</button>
+<button onclick="createBooking()">Create Booking</button>
+<button onclick="getHelpers()">View Helpers</button>
+<button onclick="getBookings()">View Bookings</button>
+
+<div id="output">Result will appear here</div>
+
+<script>
+
+const BASE_URL = "https://aidmatch.onrender.com";
+
+
+async function addHelper()
+{
+    const response = await fetch(BASE_URL + "/api/helpers/add-helper",
+    {
+        method: "POST",
+        headers:
+        {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: "Demo Helper",
+            skills: ["cleaning"],
+            latitude: 30.7046,
+            longitude: 76.7179,
+            rating: 4.5
+        })
+    });
+
+    const data = await response.text();
+    document.getElementById("output").innerHTML = data;
+}
+
+
+async function createBooking()
+{
+    const response = await fetch(BASE_URL + "/api/bookings/create-booking",
+    {
+        method: "POST",
+        headers:
+        {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            serviceType: "cleaning",
+            latitude: 30.7046,
+            longitude: 76.7179
+        })
+    });
+
+    const data = await response.text();
+    document.getElementById("output").innerHTML = data;
+}
+
+
+async function getHelpers()
+{
+    const response = await fetch(BASE_URL + "/api/helpers/all");
+    const data = await response.json();
+
+    document.getElementById("output").innerHTML =
+        JSON.stringify(data, null, 2);
+}
+
+
+async function getBookings()
+{
+    const response = await fetch(BASE_URL + "/api/bookings/all");
+    const data = await response.json();
+
+    document.getElementById("output").innerHTML =
+        JSON.stringify(data, null, 2);
+}
+
+</script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 const helperRoutes = require("./routes/helperRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
@@ -8,6 +9,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const app = express();
 
 // middleware (important for future)
+app.use(cors());
 app.use(express.json());
 app.use("/api/helpers", helperRoutes);
 app.use("/api/bookings", bookingRoutes);
