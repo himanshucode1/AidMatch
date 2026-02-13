@@ -38,3 +38,39 @@ router.get("/all", async (req, res) =>
     const helpers = await Helper.find();
     res.json(helpers);
 });
+
+// Update helper live location API
+router.post("/update-location", async (req, res) =>
+{
+    try
+    {
+        const { helperId, latitude, longitude } = req.body;
+
+        // validate input
+        if(!helperId || latitude == null || longitude == null)
+        {
+            return res.status(400).send("Missing required fields");
+        }
+
+        // find helper
+        const helper = await Helper.findById(helperId);
+
+        if(!helper)
+        {
+            return res.status(404).send("Helper not found");
+        }
+
+        // update location
+        helper.latitude = latitude;
+        helper.longitude = longitude;
+
+        await helper.save();
+
+        res.send("Helper location updated successfully");
+    }
+    catch(error)
+    {
+        console.error(error);
+        res.status(500).send("Error updating helper location");
+    }
+});

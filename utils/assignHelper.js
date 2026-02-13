@@ -1,10 +1,10 @@
 const Helper = require("../models/helper");
 
 
-// function to calculate distance
+// Accurate GPS distance calculation using Haversine formula
 function calculateDistance(lat1, lon1, lat2, lon2)
 {
-    const R = 6371; // Earth's radius in km
+    const R = 6371; // Earth's radius in kilometers
 
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -18,34 +18,30 @@ function calculateDistance(lat1, lon1, lat2, lon2)
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    const distance = R * c;
-
-    return distance;
+    return R * c; // distance in km
 }
 
 
 
-// main assignment function
+// Main assignment function
 async function assignHelper(serviceType, userLat, userLon)
 {
     try
     {
-        // find helpers with required skill and available
+        // Find helpers with required skill and available status
         const helpers = await Helper.find({
             skills: serviceType,
             available: true
         });
 
-
+        // If no helpers available
         if(helpers.length === 0)
         {
             return null;
         }
 
-
         let bestHelper = null;
         let bestScore = Infinity;
-
 
         helpers.forEach(helper =>
         {
@@ -56,9 +52,11 @@ async function assignHelper(serviceType, userLat, userLon)
                 helper.longitude
             );
 
-            // score based on distance and rating
-            const score = distance - helper.rating;
+            // Improved scoring logic
+            // Distance is primary factor, rating improves helper priority
+            const score = distance - (helper.rating * 0.5);
 
+            // Select helper with best score
             if(score < bestScore)
             {
                 bestScore = score;
@@ -66,12 +64,11 @@ async function assignHelper(serviceType, userLat, userLon)
             }
         });
 
-
         return bestHelper;
     }
     catch(error)
     {
-        console.log(error);
+        console.error("Error assigning helper:", error);
         return null;
     }
 }
