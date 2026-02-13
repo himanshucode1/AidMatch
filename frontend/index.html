@@ -1,58 +1,214 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AidMatch - Smart Helper System</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f6f8;
-            text-align: center;
-            padding: 40px;
-        }
 
-        h1 {
-            color: #2c3e50;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        button {
-            padding: 12px 20px;
-            margin: 10px;
-            border: none;
-            background: #3498db;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+<title>AidMatch - Smart Helper Auto Assignment</title>
 
-        button:hover {
-            background: #2980b9;
-        }
+<style>
 
-        #output {
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 5px;
-        }
-    </style>
+body
+{
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+.container
+{
+    width: 80%;
+    margin: auto;
+    margin-top: 40px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h1
+{
+    text-align: center;
+}
+
+button
+{
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover
+{
+    background-color: #2980b9;
+}
+
+select, input
+{
+    padding: 8px;
+    margin-top: 5px;
+    width: 200px;
+}
+
+#output
+{
+    margin-top: 20px;
+    padding: 10px;
+    background: #ecf0f1;
+    border-radius: 5px;
+}
+
+</style>
+
 </head>
-
 <body>
 
-<h1>AidMatch - Smart Helper Auto Assignment</h1> 
+<div class="container">
 
-<button onclick="addHelper()">Add Helper</button>
-<button onclick="createBooking()">Create Booking</button>
-<button onclick="getHelpers()">View Helpers</button>
-<button onclick="getBookings()">View Bookings</button>
+<h1>AidMatch - Smart Helper Auto Assignment</h1>
 
-<div id="output">Result will appear here</div>
+
+<!-- Service Booking Section -->
+
+<h3>Create Service Booking</h3>
+
+<label>Select Service Type:</label><br>
+
+<select id="serviceType">
+<option value="cleaning">Cleaning</option>
+<option value="repairing">Repairing</option>
+<option value="plumbing">Plumbing</option>
+<option value="electrician">Electrician</option>
+</select>
+
+<br><br>
+
+<button onclick="getLocation()">Detect My GPS Location</button>
+
+<p id="locationStatus">Location not detected</p>
+
+<button onclick="createBooking()">Book Helper</button>
+
+
+<hr>
+
+
+<!-- Helper Section -->
+
+<h3>Helper Management</h3>
+
+<button onclick="addHelper()">Add Demo Helper</button>
+
+<button onclick="viewHelpers()">View Helpers</button>
+
+
+<hr>
+
+
+<!-- Booking Section -->
+
+<h3>Booking Management</h3>
+
+<button onclick="viewBookings()">View Bookings</button>
+
+
+<div id="output"></div>
+
+
+</div>
+
 
 <script>
 
 const BASE_URL = "https://aidmatch.onrender.com";
 
+
+let userLatitude = null;
+let userLongitude = null;
+
+
+
+// GPS LOCATION
+
+function getLocation()
+{
+    if(navigator.geolocation)
+    {
+        navigator.geolocation.getCurrentPosition(
+
+            function(position)
+            {
+                userLatitude = position.coords.latitude;
+                userLongitude = position.coords.longitude;
+
+                document.getElementById("locationStatus").innerHTML =
+                "Location detected: " + userLatitude + ", " + userLongitude;
+            },
+
+            function()
+            {
+                alert("Unable to detect location");
+            }
+
+        );
+    }
+    else
+    {
+        alert("Geolocation not supported");
+    }
+}
+
+
+
+// CREATE BOOKING
+
+async function createBooking()
+{
+    const serviceType = document.getElementById("serviceType").value;
+
+    if(userLatitude == null)
+    {
+        alert("Please detect location first");
+        return;
+    }
+
+    const response = await fetch(BASE_URL + "/api/bookings/create-booking",
+    {
+        method: "POST",
+        headers:
+        {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(
+        {
+            serviceType: serviceType,
+            userLatitude: userLatitude,
+            userLongitude: userLongitude
+        })
+    });
+
+    const result = await response.json();
+
+    if(result.helper)
+    {
+        document.getElementById("output").innerHTML =
+        "<b>Helper Assigned:</b> " + result.helper.name;
+    }
+    else
+    {
+        document.getElementById("output").innerHTML =
+        "<b>No helper available</b>";
+    }
+}
+
+
+
+// ADD HELPER
 
 async function addHelper()
 {
@@ -63,61 +219,76 @@ async function addHelper()
         {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
+        body: JSON.stringify(
+        {
             name: "Demo Helper",
-            skills: ["cleaning"],
-            latitude: 30.7046,
-            longitude: 76.7179,
+            skills: ["cleaning","repairing","plumbing"],
+            latitude: 30.7333,
+            longitude: 76.7794,
             rating: 4.5
         })
     });
 
-    const data = await response.text();
-    document.getElementById("output").innerHTML = data;
+    const text = await response.text();
+
+    document.getElementById("output").innerHTML = text;
 }
 
 
-async function createBooking()
-{
-    const response = await fetch(BASE_URL + "/api/bookings/create-booking",
-    {
-        method: "POST",
-        headers:
-        {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            serviceType: "cleaning",
-            latitude: 30.7046,
-            longitude: 76.7179
-        })
-    });
 
-    const data = await response.text();
-    document.getElementById("output").innerHTML = data;
-}
+// VIEW HELPERS
 
-
-async function getHelpers()
+async function viewHelpers()
 {
     const response = await fetch(BASE_URL + "/api/helpers/all");
-    const data = await response.json();
 
-    document.getElementById("output").innerHTML =
-        JSON.stringify(data, null, 2);
+    const helpers = await response.json();
+
+    let html = "<h4>Helpers List:</h4>";
+
+    helpers.forEach(helper =>
+    {
+        html +=
+        `
+        Name: ${helper.name}<br>
+        Skills: ${helper.skills}<br>
+        Location: ${helper.latitude}, ${helper.longitude}<br>
+        Rating: ${helper.rating}<br>
+        Available: ${helper.available}<br><br>
+        `;
+    });
+
+    document.getElementById("output").innerHTML = html;
 }
 
 
-async function getBookings()
+
+// VIEW BOOKINGS
+
+async function viewBookings()
 {
     const response = await fetch(BASE_URL + "/api/bookings/all");
-    const data = await response.json();
 
-    document.getElementById("output").innerHTML =
-        JSON.stringify(data, null, 2);
+    const bookings = await response.json();
+
+    let html = "<h4>Bookings List:</h4>";
+
+    bookings.forEach(booking =>
+    {
+        html +=
+        `
+        Service: ${booking.serviceType}<br>
+        Helper: ${booking.helperId?.name || "Not Assigned"}<br>
+        Status: ${booking.status}<br><br>
+        `;
+    });
+
+    document.getElementById("output").innerHTML = html;
 }
 
+
 </script>
+
 
 </body>
 </html>
