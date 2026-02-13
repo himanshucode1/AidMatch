@@ -21,38 +21,42 @@ router.post("/add-helper", async (req, res) =>
         await helper.save();
 
         res.send("Helper added successfully");
-
     }
     catch(error)
     {
-        res.send("Error adding helper");
+        console.log(error);
+        res.status(500).send("Error adding helper");
     }
 });
-
-module.exports = router;
 
 
 // get all helpers
 router.get("/all", async (req, res) =>
 {
-    const helpers = await Helper.find();
-    res.json(helpers);
+    try
+    {
+        const helpers = await Helper.find();
+        res.json(helpers);
+    }
+    catch(error)
+    {
+        res.status(500).send("Error fetching helpers");
+    }
 });
 
-// Update helper live location API
+
+// Update helper live location
 router.post("/update-location", async (req, res) =>
 {
     try
     {
         const { helperId, latitude, longitude } = req.body;
 
-        // validate input
         if(!helperId || latitude == null || longitude == null)
         {
             return res.status(400).send("Missing required fields");
         }
 
-        // find helper
         const helper = await Helper.findById(helperId);
 
         if(!helper)
@@ -60,7 +64,6 @@ router.post("/update-location", async (req, res) =>
             return res.status(404).send("Helper not found");
         }
 
-        // update location
         helper.latitude = latitude;
         helper.longitude = longitude;
 
@@ -70,7 +73,11 @@ router.post("/update-location", async (req, res) =>
     }
     catch(error)
     {
-        console.error(error);
+        console.log(error);
         res.status(500).send("Error updating helper location");
     }
 });
+
+
+// IMPORTANT: export must be LAST line
+module.exports = router;
