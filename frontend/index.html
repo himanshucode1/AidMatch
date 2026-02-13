@@ -5,64 +5,153 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AidMatch - Smart Helper Auto Assignment</title>
+<title>AidMatch | Smart Helper Auto Assignment</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
 
-body
-{
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to right, #eef2f3, #dfe9f3);
-    margin: 0;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-.header
-{
-    background: #2c3e50;
-    color: white;
-    padding: 20px;
-    text-align: center;
+body{
+    font-family:'Poppins', sans-serif;
+    background:linear-gradient(135deg,#eef2f7,#d9e4f5);
+    color:#2c3e50;
 }
 
-.container
-{
-    width: 70%;
-    margin: auto;
-    margin-top: 30px;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+
+/* HEADER */
+
+.header{
+    background:#1e3c72;
+    background:linear-gradient(to right,#1e3c72,#2a5298);
+    color:white;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.2);
 }
 
-button
-{
-    padding: 10px 20px;
-    margin: 10px 5px;
-    border: none;
-    background: #3498db;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
+.header h1{
+    font-weight:600;
+    letter-spacing:1px;
 }
 
-button:hover
-{
-    background: #2980b9;
+.header p{
+    opacity:0.9;
 }
 
-select
-{
-    padding: 8px;
-    margin-top: 10px;
+
+/* MAIN CONTAINER */
+
+.container{
+    max-width:900px;
+    margin:40px auto;
+    padding:30px;
 }
 
-#result
-{
-    margin-top: 20px;
-    padding: 15px;
-    background: #ecf0f1;
-    border-radius: 5px;
+
+/* CARD */
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    margin-bottom:25px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+
+/* FORM */
+
+.form-group{
+    margin-bottom:20px;
+}
+
+label{
+    font-weight:500;
+    display:block;
+    margin-bottom:8px;
+}
+
+select{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+
+/* BUTTON */
+
+.button-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:6px;
+    background:#2a5298;
+    color:white;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#1e3c72;
+}
+
+
+/* LOCATION DISPLAY */
+
+.location-box{
+    background:#f4f7fb;
+    padding:12px;
+    border-radius:6px;
+    margin-top:10px;
+    font-size:14px;
+}
+
+
+/* RESULT BOX */
+
+.result-box{
+    background:#f8fbff;
+    padding:20px;
+    border-radius:8px;
+    margin-top:20px;
+    border-left:5px solid #2a5298;
+}
+
+.helper-card{
+    background:white;
+    padding:15px;
+    border-radius:8px;
+    margin-top:10px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.08);
+}
+
+.helper-card strong{
+    color:#2a5298;
+}
+
+
+/* FOOTER */
+
+.footer{
+    text-align:center;
+    margin-top:40px;
+    padding:20px;
+    color:#777;
+    font-size:14px;
 }
 
 </style>
@@ -71,41 +160,109 @@ select
 
 <body>
 
+
+<!-- HEADER -->
+
 <div class="header">
+
 <h1>AidMatch</h1>
+
 <p>Smart Helper Auto Assignment System</p>
+
 </div>
+
+
 
 <div class="container">
 
-<h3>Book a Helper</h3>
 
-<label>Select Service:</label><br>
+<!-- SERVICE CARD -->
 
-<select id="service">
+<div class="card">
+
+<h3>Book a Service</h3>
+
+<div class="form-group">
+
+<label>Select Service Type</label>
+
+<select id="serviceType">
+
 <option value="cleaning">Cleaning</option>
 <option value="repairing">Repairing</option>
 <option value="plumbing">Plumbing</option>
 <option value="electrician">Electrician</option>
+
 </select>
 
-<br>
+</div>
+
+
+<div class="button-group">
 
 <button onclick="detectLocation()">Detect My Location</button>
-
-<p id="locationStatus">Location not detected</p>
 
 <button onclick="searchHelper()">Search Helper</button>
 
 <button onclick="confirmBooking()">Confirm Booking</button>
 
-<hr>
+</div>
+
+
+<div class="location-box" id="locationDisplay">
+
+Location not detected
+
+</div>
+
+</div>
+
+
+
+<!-- RESULT CARD -->
+
+<div class="card">
+
+<h3>Helper Assignment</h3>
+
+<div class="result-box" id="resultBox">
+
+No helper searched yet
+
+</div>
+
+</div>
+
+
+
+<!-- HELPER LIST CARD -->
+
+<div class="card">
+
+<h3>Helper Management</h3>
+
+<div class="button-group">
 
 <button onclick="viewHelpers()">View All Helpers</button>
 
-<div id="result"></div>
+</div>
+
+<div id="helperList"></div>
 
 </div>
+
+
+</div>
+
+
+
+<div class="footer">
+
+AidMatch © 2026 | Smart Service Assignment Platform
+
+</div>
+
+
 
 <script>
 
@@ -116,43 +273,62 @@ let userLon = null;
 let selectedHelper = null;
 
 
-// Detect GPS
+
+// DETECT GPS
+
 function detectLocation()
 {
-    navigator.geolocation.getCurrentPosition(position =>
-    {
-        userLat = position.coords.latitude;
-        userLon = position.coords.longitude;
+    navigator.geolocation.getCurrentPosition(
 
-        document.getElementById("locationStatus").innerHTML =
-        "Location: " + userLat + ", " + userLon;
-    });
+        function(position)
+        {
+            userLat = position.coords.latitude;
+            userLon = position.coords.longitude;
+
+            document.getElementById("locationDisplay").innerHTML =
+            "Latitude: " + userLat.toFixed(6) +
+            "<br>Longitude: " + userLon.toFixed(6);
+        },
+
+        function()
+        {
+            alert("Unable to detect location");
+        }
+
+    );
 }
 
 
-// Search helper from database
+
+// SEARCH HELPER
+
 async function searchHelper()
 {
-    const service = document.getElementById("service").value;
+    const serviceType =
+    document.getElementById("serviceType").value;
 
     if(userLat == null)
     {
-        alert("Detect location first");
+        alert("Please detect location first");
         return;
     }
 
-    const response = await fetch(BASE_URL + "/api/bookings/search-helper",
+    const response =
+    await fetch(BASE_URL +
+    "/api/bookings/search-helper",
     {
-        method: "POST",
+        method:"POST",
+
         headers:
         {
-            "Content-Type": "application/json"
+            "Content-Type":"application/json"
         },
-        body: JSON.stringify(
+
+        body:JSON.stringify(
         {
-            serviceType: service,
-            userLatitude: userLat,
-            userLongitude: userLon
+            serviceType,
+            userLatitude:userLat,
+            userLongitude:userLon
         })
     });
 
@@ -162,21 +338,30 @@ async function searchHelper()
     {
         selectedHelper = data.helper;
 
-        document.getElementById("result").innerHTML =
-        "Best Helper Found:<br><br>" +
-        "Name: " + data.helper.name + "<br>" +
-        "Rating: " + data.helper.rating + "<br>" +
-        "Distance: " + data.distance.toFixed(2) + " km";
+        document.getElementById("resultBox").innerHTML =
+
+        `<div class="helper-card">
+
+        <strong>Helper Found</strong><br><br>
+
+        Name: ${data.helper.name}<br>
+        Skills: ${data.helper.skills}<br>
+        Rating: ${data.helper.rating}<br>
+        Status: Available
+
+        </div>`;
     }
     else
     {
-        document.getElementById("result").innerHTML =
+        document.getElementById("resultBox").innerHTML =
         "No helper available";
     }
 }
 
 
-// Confirm booking
+
+// CONFIRM BOOKING
+
 async function confirmBooking()
 {
     if(!selectedHelper)
@@ -185,50 +370,76 @@ async function confirmBooking()
         return;
     }
 
-    const service = document.getElementById("service").value;
+    const serviceType =
+    document.getElementById("serviceType").value;
 
-    const response = await fetch(BASE_URL + "/api/bookings/create-booking",
+    const response =
+    await fetch(BASE_URL +
+    "/api/bookings/create-booking",
     {
-        method: "POST",
+        method:"POST",
+
         headers:
         {
-            "Content-Type": "application/json"
+            "Content-Type":"application/json"
         },
-        body: JSON.stringify(
+
+        body:JSON.stringify(
         {
-            serviceType: service,
-            userLatitude: userLat,
-            userLongitude: userLon
+            serviceType,
+            userLatitude:userLat,
+            userLongitude:userLon
         })
     });
 
-    const result = await response.json();
+    const result =
+    await response.json();
 
-    document.getElementById("result").innerHTML =
-    "Booking Confirmed<br>Helper Assigned: " + result.helper.name;
+    document.getElementById("resultBox").innerHTML =
+
+    `<div class="helper-card">
+
+    <strong>Booking Confirmed</strong><br><br>
+
+    Helper Assigned: ${result.helper.name}
+
+    </div>`;
 }
 
 
-// View helpers
+
+// VIEW HELPERS
+
 async function viewHelpers()
 {
-    const response = await fetch(BASE_URL + "/api/helpers/all");
+    const response =
+    await fetch(BASE_URL + "/api/helpers/all");
 
-    const helpers = await response.json();
+    const helpers =
+    await response.json();
 
-    let html = "Helpers:<br><br>";
+    let html = "";
 
-    helpers.forEach(h =>
+    helpers.forEach(helper =>
     {
         html +=
-        h.name +
-        " | Skills: " + h.skills +
-        " | Rating: " + h.rating +
-        "<br>";
+
+        `<div class="helper-card">
+
+        <strong>${helper.name}</strong><br>
+
+        Skills: ${helper.skills}<br>
+        Rating: ${helper.rating}<br>
+        Location: ${helper.latitude},
+        ${helper.longitude}
+
+        </div>`;
     });
 
-    document.getElementById("result").innerHTML = html;
+    document.getElementById("helperList").innerHTML =
+    html;
 }
+
 
 </script>
 
