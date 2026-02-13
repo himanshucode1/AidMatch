@@ -11,33 +11,36 @@
 
 body
 {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f8;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to right, #eef2f3, #dfe9f3);
     margin: 0;
-    padding: 0;
+}
+
+.header
+{
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    text-align: center;
 }
 
 .container
 {
-    width: 80%;
+    width: 70%;
     margin: auto;
-    margin-top: 40px;
+    margin-top: 30px;
     background: white;
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
-}
-
-h1
-{
-    text-align: center;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
 }
 
 button
 {
     padding: 10px 20px;
-    margin: 10px;
+    margin: 10px 5px;
     border: none;
-    background-color: #3498db;
+    background: #3498db;
     color: white;
     border-radius: 5px;
     cursor: pointer;
@@ -45,20 +48,19 @@ button
 
 button:hover
 {
-    background-color: #2980b9;
+    background: #2980b9;
 }
 
-select, input
+select
 {
     padding: 8px;
-    margin-top: 5px;
-    width: 200px;
+    margin-top: 10px;
 }
 
-#output
+#result
 {
     margin-top: 20px;
-    padding: 10px;
+    padding: 15px;
     background: #ecf0f1;
     border-radius: 5px;
 }
@@ -66,116 +68,124 @@ select, input
 </style>
 
 </head>
+
 <body>
+
+<div class="header">
+<h1>AidMatch</h1>
+<p>Smart Helper Auto Assignment System</p>
+</div>
 
 <div class="container">
 
-<h1>AidMatch - Smart Helper Auto Assignment</h1>
+<h3>Book a Helper</h3>
 
+<label>Select Service:</label><br>
 
-<!-- Service Booking Section -->
-
-<h3>Create Service Booking</h3>
-
-<label>Select Service Type:</label><br>
-
-<select id="serviceType">
+<select id="service">
 <option value="cleaning">Cleaning</option>
 <option value="repairing">Repairing</option>
 <option value="plumbing">Plumbing</option>
 <option value="electrician">Electrician</option>
 </select>
 
-<br><br>
+<br>
 
-<button onclick="getLocation()">Detect My GPS Location</button>
+<button onclick="detectLocation()">Detect My Location</button>
 
 <p id="locationStatus">Location not detected</p>
 
-<button onclick="createBooking()">Book Helper</button>
+<button onclick="searchHelper()">Search Helper</button>
 
-
-<hr>
-
-
-<!-- Helper Section -->
-
-<h3>Helper Management</h3>
-
-<button onclick="addHelper()">Add Demo Helper</button>
-
-<button onclick="viewHelpers()">View Helpers</button>
-
+<button onclick="confirmBooking()">Confirm Booking</button>
 
 <hr>
 
+<button onclick="viewHelpers()">View All Helpers</button>
 
-<!-- Booking Section -->
-
-<h3>Booking Management</h3>
-
-<button onclick="viewBookings()">View Bookings</button>
-
-
-<div id="output"></div>
-
+<div id="result"></div>
 
 </div>
-
 
 <script>
 
 const BASE_URL = "https://aidmatch.onrender.com";
 
+let userLat = null;
+let userLon = null;
+let selectedHelper = null;
 
-let userLatitude = null;
-let userLongitude = null;
 
-
-
-// GPS LOCATION
-
-function getLocation()
+// Detect GPS
+function detectLocation()
 {
-    if(navigator.geolocation)
+    navigator.geolocation.getCurrentPosition(position =>
     {
-        navigator.geolocation.getCurrentPosition(
+        userLat = position.coords.latitude;
+        userLon = position.coords.longitude;
 
-            function(position)
-            {
-                userLatitude = position.coords.latitude;
-                userLongitude = position.coords.longitude;
+        document.getElementById("locationStatus").innerHTML =
+        "Location: " + userLat + ", " + userLon;
+    });
+}
 
-                document.getElementById("locationStatus").innerHTML =
-                "Location detected: " + userLatitude + ", " + userLongitude;
-            },
 
-            function()
-            {
-                alert("Unable to detect location");
-            }
+// Search helper from database
+async function searchHelper()
+{
+    const service = document.getElementById("service").value;
 
-        );
+    if(userLat == null)
+    {
+        alert("Detect location first");
+        return;
+    }
+
+    const response = await fetch(BASE_URL + "/api/bookings/search-helper",
+    {
+        method: "POST",
+        headers:
+        {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(
+        {
+            serviceType: service,
+            userLatitude: userLat,
+            userLongitude: userLon
+        })
+    });
+
+    const data = await response.json();
+
+    if(data.helper)
+    {
+        selectedHelper = data.helper;
+
+        document.getElementById("result").innerHTML =
+        "Best Helper Found:<br><br>" +
+        "Name: " + data.helper.name + "<br>" +
+        "Rating: " + data.helper.rating + "<br>" +
+        "Distance: " + data.distance.toFixed(2) + " km";
     }
     else
     {
-        alert("Geolocation not supported");
+        document.getElementById("result").innerHTML =
+        "No helper available";
     }
 }
 
 
-
-// CREATE BOOKING
-
-async function createBooking()
+// Confirm booking
+async function confirmBooking()
 {
-    const serviceType = document.getElementById("serviceType").value;
-
-    if(userLatitude == null)
+    if(!selectedHelper)
     {
-        alert("Please detect location first");
+        alert("Search helper first");
         return;
     }
+
+    const service = document.getElementById("service").value;
 
     const response = await fetch(BASE_URL + "/api/bookings/create-booking",
     {
@@ -186,109 +196,41 @@ async function createBooking()
         },
         body: JSON.stringify(
         {
-            serviceType: serviceType,
-            userLatitude: userLatitude,
-            userLongitude: userLongitude
+            serviceType: service,
+            userLatitude: userLat,
+            userLongitude: userLon
         })
     });
 
     const result = await response.json();
 
-    if(result.helper)
-    {
-        document.getElementById("output").innerHTML =
-        "<b>Helper Assigned:</b> " + result.helper.name;
-    }
-    else
-    {
-        document.getElementById("output").innerHTML =
-        "<b>No helper available</b>";
-    }
+    document.getElementById("result").innerHTML =
+    "Booking Confirmed<br>Helper Assigned: " + result.helper.name;
 }
 
 
-
-// ADD HELPER
-
-async function addHelper()
-{
-    const response = await fetch(BASE_URL + "/api/helpers/add-helper",
-    {
-        method: "POST",
-        headers:
-        {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(
-        {
-            name: "Demo Helper",
-            skills: ["cleaning","repairing","plumbing"],
-            latitude: 30.7333,
-            longitude: 76.7794,
-            rating: 4.5
-        })
-    });
-
-    const text = await response.text();
-
-    document.getElementById("output").innerHTML = text;
-}
-
-
-
-// VIEW HELPERS
-
+// View helpers
 async function viewHelpers()
 {
     const response = await fetch(BASE_URL + "/api/helpers/all");
 
     const helpers = await response.json();
 
-    let html = "<h4>Helpers List:</h4>";
+    let html = "Helpers:<br><br>";
 
-    helpers.forEach(helper =>
+    helpers.forEach(h =>
     {
         html +=
-        `
-        Name: ${helper.name}<br>
-        Skills: ${helper.skills}<br>
-        Location: ${helper.latitude}, ${helper.longitude}<br>
-        Rating: ${helper.rating}<br>
-        Available: ${helper.available}<br><br>
-        `;
+        h.name +
+        " | Skills: " + h.skills +
+        " | Rating: " + h.rating +
+        "<br>";
     });
 
-    document.getElementById("output").innerHTML = html;
+    document.getElementById("result").innerHTML = html;
 }
-
-
-
-// VIEW BOOKINGS
-
-async function viewBookings()
-{
-    const response = await fetch(BASE_URL + "/api/bookings/all");
-
-    const bookings = await response.json();
-
-    let html = "<h4>Bookings List:</h4>";
-
-    bookings.forEach(booking =>
-    {
-        html +=
-        `
-        Service: ${booking.serviceType}<br>
-        Helper: ${booking.helperId?.name || "Not Assigned"}<br>
-        Status: ${booking.status}<br><br>
-        `;
-    });
-
-    document.getElementById("output").innerHTML = html;
-}
-
 
 </script>
-
 
 </body>
 </html>
