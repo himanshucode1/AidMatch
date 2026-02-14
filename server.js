@@ -17,7 +17,7 @@ app.use("/api/bookings", bookingRoutes);
 
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://aidmatch123:Apple123@cluster0.mzlnpuo.mongodb.net/")
+mongoose.connect("mongodb+srv://aidmatchuser:Apple123@cluster0.mzlnpuo.mongodb.net/aidmatch?retryWrites=true&w=majority")
 .then(() =>
 {
     console.log("AidMatch Database Connected");
